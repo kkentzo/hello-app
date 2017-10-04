@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgdbm-dev \
     libgmp-dev \
     libgmp-dev \
+    default-libmysqlclient-dev \
     libncurses5-dev \
     libreadline-dev \
     libsqlite3-dev \
@@ -46,16 +47,24 @@ RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A170311380
     && echo "gem: --no-document --no-ri --no-rdoc" >> ~/.gemrc \
     && echo "bundler" > ~/.rvm/gemsets/global.gems
 
-# git clone from github
-RUN git clone https://github.com/kkentzo/hello-app.git
-WORKDIR hello-app
-
 # install ruby
-RUN /bin/bash -l -c "rvm install ruby-$(cut -d - -f 2 .ruby-version)"
+RUN /bin/bash -l -c "rvm install ruby-2.3.1"
+
+RUN mkdir -p app
+ADD . app/
+
+# fix ownership of app directory
+USER root
+RUN chown -R rails:rails app
+USER rails
+WORKDIR app
+
+# bundle the app
 RUN /bin/bash -l -c "bundle install"
 
 EXPOSE 3000
 
-CMD ["/bin/bash", "-l", "-c", "bundle exec rails s"]
+#CMD ["/bin/bash", "-l"]
+CMD ["/bin/bash", "-l", "-c", "env && bundle exec rake db:setup && bin/rails s"]
 
 # TODO: VOLUMES for logs/, tmp/ etc.

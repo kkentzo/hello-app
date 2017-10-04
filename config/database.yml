@@ -1,20 +1,24 @@
 default: &default
   adapter: mysql2
   encoding: utf8
-  port: 3306
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   timeout: 5000
 
 development:
   <<: *default
-  host: localhost
+  host: db
+  port: 3306
   database: hello_development
   username: root
   password:
 
 test:
   <<: *default
+  host: db
+  port: 3306
   database: hello_test
+  username: root
+  password:
 
 production:
   <<: *default
